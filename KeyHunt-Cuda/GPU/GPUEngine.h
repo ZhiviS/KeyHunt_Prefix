@@ -35,7 +35,7 @@
 #define COIN_ETH 2
 
 // Number of key per thread (must be a multiple of GRP_SIZE) per kernel call
-#define STEP_SIZE (1024*2)
+#define STEP_SIZE (1024*4)
 
 // Number of thread per block
 #define ITEM_SIZE_A 28
@@ -71,6 +71,8 @@ public:
 	bool LaunchSEARCH_MODE_SA(std::vector<ITEM>& dataFound, bool spinWait = false);
 	bool LaunchSEARCH_MODE_MX(std::vector<ITEM>& dataFound, bool spinWait = false);
 	bool LaunchSEARCH_MODE_SX(std::vector<ITEM>& dataFound, bool spinWait = false);
+	bool UpdateKeys(Point* p);
+	bool RunKernelSX();
 
 	int GetNbThread();
 	int GetGroupSize();
@@ -79,6 +81,7 @@ public:
 	std::string deviceName;
 
 	static void PrintCudaInfo();
+    void SetStepTable(Point* stepGn, Point _2StepGn);
 	static void GenerateCode(Secp256K1* secp, int size);
 
 private:
