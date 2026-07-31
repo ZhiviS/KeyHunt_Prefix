@@ -1,0 +1,170 @@
+﻿  Compiling CUDA source file GPU\GPUEngine.cu...
+  
+  C:\projects\KeyHuntCudaClient\KeyHunt-Cuda>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\bin\nvcc.exe" -gencode=arch=compute_100,code=\"sm_100,compute_100\" -gencode=arch=compute_110,code=\"sm_110,compute_110\" -gencode=arch=compute_120,code=\"sm_120,compute_120\" --use-local-env -ccbin "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64" -x cu   -IC:\projects\KeyHuntCudaClient\gmp\include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\include" -I"C:\Users\Admin\vcpkg\installed\x64-windows\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\include"     --keep-dir x64\Release  -maxrregcount=0    --machine 64 --compile -cudart hybrid    -DWIN32 -DWIN64 -DNDEBUG -D_CONSOLE -DWITHGPU -D_CRT_SECURE_NO_WARNINGS -D_MBCS -Xcompiler "/EHsc /W3 /nologo /O2 /FS   /MD " -Xcompiler "/Fdx64\Release\vc143.pdb" -o C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\x64\Release\GPUEngine.cu.obj "C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu" 
+  device_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead.
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(438): warning #177-D: variable "sComputeMode" was declared but never referenced
+    	const char* sComputeMode[] = {
+    	            ^
+  
+  Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+  
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(854): warning #177-D: variable "pubkey" was declared but never referenced
+    		uint8_t* pubkey = (uint8_t*)(itemPtr + 2);
+    		         ^
+  
+  device_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead.
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(438): warning #177-D: variable "sComputeMode" was declared but never referenced
+    	const char* sComputeMode[] = {
+    	            ^
+  
+  Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+  
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(854): warning #177-D: variable "pubkey" was declared but never referenced
+    		uint8_t* pubkey = (uint8_t*)(itemPtr + 2);
+    		         ^
+  
+  device_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead.
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(438): warning #177-D: variable "sComputeMode" was declared but never referenced
+    	const char* sComputeMode[] = {
+    	            ^
+  
+  Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+  
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(854): warning #177-D: variable "pubkey" was declared but never referenced
+    		uint8_t* pubkey = (uint8_t*)(itemPtr + 2);
+    		         ^
+  
+  GPUEngine.cu
+  tmpxft_000036a0_00000000-7_GPUEngine.compute_120.cudafe1.cpp
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(508): warning C4244: аргумент: преобразование "uint64_t" в "int", возможна потеря данных
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(512): warning C4244: аргумент: преобразование "uint64_t" в "int", возможна потеря данных
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(517): warning C4244: аргумент: преобразование "uint64_t" в "int", возможна потеря данных
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\GPU\GPUEngine.cu(540): warning C4244: аргумент: преобразование "uint64_t" в "int", возможна потеря данных
+cl : командная строка  warning D9002: пропуск неизвестного параметра "/arch:SSE"
+  Base58.cpp
+  Bloom.cpp
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\Bloom.cpp(81,21): warning C4244: инициализация: преобразование "unsigned __int64" в "unsigned int", возможна потеря данных
+  CmdParse.cpp
+  GmpUtil.cpp
+C:\projects\KeyHuntCudaClient\gmp\include\gmp.h(1795,24): warning C4244: return: преобразование "mp_limb_t" в "unsigned long", возможна потеря данных
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(101,26): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(155,6): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(206,24): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(278,24): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(322,24): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(330,26): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(372,37): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(407,24): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(414,24): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(442,36): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(525,20): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(570,20): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(599,19): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(667,13): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(720,20): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(764,19): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(774,16): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(1292,10): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(1593,12): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+C:\projects\KeyHuntCudaClient\gmp\include\gmpxx.h(1617,10): warning C4146: применение унарного минуса к типу без знака; результат оставлен без знака
+  (компиляция исходного файла "GmpUtil.cpp")
+  
+  GPUGenerate.cpp
+  keccak160.cpp
+  ripemd160.cpp
+  ripemd160_sse.cpp
+  sha256.cpp
+  sha256_sse.cpp
+  sha512.cpp
+  Int.cpp
+  IntGroup.cpp
+  IntMod.cpp
+  KeyHunt.cpp
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(98,12): warning C4477: "printf": в строке форматирования "%lu" требуется аргумент типа "unsigned long", но вариативный аргумент "1" имеет тип "uint64_t"
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(98,12):
+      рекомендуется использовать "%llu" в строке форматирования
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(98,12):
+      рекомендуется использовать "%Iu" в строке форматирования
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(98,12):
+      рекомендуется использовать "%I64u" в строке форматирования
+  
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(205,10): warning C4477: "printf": в строке форматирования "%lu" требуется аргумент типа "unsigned long", но вариативный аргумент "1" имеет тип "uint64_t"
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(205,10):
+      рекомендуется использовать "%llu" в строке форматирования
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(205,10):
+      рекомендуется использовать "%Iu" в строке форматирования
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(205,10):
+      рекомендуется использовать "%I64u" в строке форматирования
+  
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(1247,15): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(1246,11): warning C4477: "printf": в строке форматирования "%lu" требуется аргумент типа "unsigned long", но вариативный аргумент "5" имеет тип "uint64_t"
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(1246,11):
+      рекомендуется использовать "%llu" в строке форматирования
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(1246,11):
+      рекомендуется использовать "%Iu" в строке форматирования
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(1246,11):
+      рекомендуется использовать "%I64u" в строке форматирования
+  
+C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(1370,15): warning C4477: "sprintf": в строке форматирования "%lu" требуется аргумент типа "unsigned long", но вариативный аргумент "1" имеет тип "uint64_t"
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(1370,15):
+      рекомендуется использовать "%llu" в строке форматирования
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(1370,15):
+      рекомендуется использовать "%Iu" в строке форматирования
+      C:\projects\KeyHuntCudaClient\KeyHunt-Cuda\KeyHunt.cpp(1370,15):
+      рекомендуется использовать "%I64u" в строке форматирования
+  
+  Main.cpp
+  Point.cpp
+  Random.cpp
+  SECP256K1.cpp
+  Timer.cpp
+gmp.lib(invert_limb_table.obj) : warning LNK4078: найдено несколько секций ".rdata" с разными атрибутами (C0400040)
+     Создается библиотека C:\projects\KeyHuntCudaClient\x64\Release\KeyHunt-Cuda.lib и объект C:\projects\KeyHuntCudaClient\x64\Release\KeyHunt-Cuda.exp
+LINK : warning LNK4098: библиотека по умолчанию "LIBCMT" конфликтует с использованием других библиотек; используйте /NODEFAULTLIB:library
+  Создание кода
+  Previous IPDB not found, fall back to full compilation.
+  All 782 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Создание кода завершено
+  KeyHunt-Cuda.vcxproj -> C:\projects\KeyHuntCudaClient\x64\Release\KeyHunt-Cuda.exe
+  "pwsh.exe" не является внутренней или внешней
+  командой, исполняемой программой или пакетным файлом.
