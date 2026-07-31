@@ -11,6 +11,9 @@
 #include <algorithm>
 #include <iostream>
 #include <cassert>
+#include <string.h>
+#include <stdexcept>
+#include <omp.h>
 #ifndef WIN64
 #include <pthread.h>
 #endif
@@ -47,7 +50,7 @@ KeyHunt::KeyHunt(const std::string& inputFile, int compMode, int searchMode, int
 
 	// === МОИ ПРАВКИ: Отключаем рандом и ставим наш шаг (для режима multiple addresses/xpoints) ===
 	this->rKey = 0;
-	customStep.SetBase16("a0d7c49d1199df"); // ВАШ ШАГ БЕЗ 0x В НАЧАЛЕ И ещё, строка 160!!!
+	customStep.SetBase16("a0d7c49d1199d"); // ВАШ ШАГ БЕЗ 0x В НАЧАЛЕ И ещё, строка 160!!!
 	// =========================================================================================
 
 	secp = new Secp256K1();
@@ -95,7 +98,7 @@ KeyHunt::KeyHunt(const std::string& inputFile, int compMode, int searchMode, int
 			bloom->add(buf, K_LENGTH);
 			memcpy(DATA + (i * K_LENGTH), buf, K_LENGTH);
 			if ((percent != 0) && i % percent == 0) {
-				printf("\rLoading      : %lu %%", (i / percent));
+				printf("\rLoading : %llu %%", (unsigned long long)(i / percent));
 				fflush(stdout);
 			}
 		}
@@ -157,7 +160,7 @@ KeyHunt::KeyHunt(const std::vector<unsigned char>& hashORxpoint, int compMode, i
 	
 	    // === МОИ ПРАВКИ: Отключаем рандом и ставим наш шаг ===
     this->rKey = 0; 
-    customStep.SetBase16("a0d7c49d1199df"); // ВАШ ШАГ БЕЗ 0x В НАЧАЛЕ!
+    customStep.SetBase16("a0d7c49d1199d"); // ВАШ ШАГ БЕЗ 0x В НАЧАЛЕ!
     // =======================================================
 
 	secp = new Secp256K1();
@@ -202,7 +205,7 @@ void KeyHunt::InitGenratorTable()
 	printf("Start Time   : %s", ctimeBuff);
 
 	if (rKey > 0) {
-		printf("Base Key     : Randomly changes on every %lu Mkeys\n", rKey);
+		printf("Base Key : Randomly changes on every %llu Mkeys\n", (unsigned long long)rKey);
 	}
 	printf("Global start : %s (%d bit)\n", this->rangeStart.GetBase16().c_str(), this->rangeStart.GetBitLength());
 	printf("Global end   : %s (%d bit)\n", this->rangeEnd.GetBase16().c_str(), this->rangeEnd.GetBitLength());
@@ -342,10 +345,17 @@ bool KeyHunt::checkPrivKeyETH(std::string addr, Int& key, int32_t incr)
 bool KeyHunt::checkPrivKeyX(Int& key, int32_t incr, bool mode)
 {
 	Int k(&key);
-	k.Add((uint64_t)incr);
+	Int offset(&customStep);
+	offset.Mult((uint64_t)incr);
+	k.Add(&offset);
+
 	Point p = secp->ComputePublicKey(&k);
-	std::string addr = secp->GetAddress(mode, p);
-	output(addr, secp->GetPrivAddress(mode, k), k.GetBase16(), secp->GetPublicKeyHex(mode, p));
+	std::string x_hex = p.x.GetBase16();
+	std::string priv_hex = k.GetBase16();
+
+	// Сохраняем оба варианта: 02|X и 03|X (без фильтра четности)
+	output("02" + x_hex, "", priv_hex, "02" + x_hex);
+	output("03" + x_hex, "", priv_hex, "03" + x_hex);
 	return true;
 }
 
@@ -910,111 +920,102 @@ void KeyHunt::FindKeyGPU(TH_PARAM * ph)
 	printf("GPU          : %s\n\n", g->deviceName.c_str());
 
 	counters[thId] = 0;
+	
+	//=========================================================
 
-	getGPUStartingKeys(tRangeStart, tRangeEnd, g->GetGroupSize(), nbThread, keys, p);
-	ok = g->SetKeys(p);
+    getGPUStartingKeys(tRangeStart, tRangeEnd, g->GetGroupSize(), nbThread, keys, p);
+
+	// === ПРАВКА: Пересчитываем p[i] для шага customStep ===
+	int grpSize = g->GetGroupSize();
+	int halfGrp = grpSize / 2;
+	for (int i = 0; i < nbThread; i++) {
+		Int k(keys + i);
+		Int offset(&customStep);
+		offset.Mult((uint64_t)halfGrp);
+		k.Add(&offset);
+		p[i] = secp->ComputePublicKey(&k);
+	}
+	// =======================================================
+
+	// Предвычисляем таблицу шагов stepGn[i] = (i+1) * customStep * G
+	Point stepP = secp->ComputePublicKey(&customStep);
+	Point* stepGn = new Point[halfGrp];
+	for (int i = 0; i < halfGrp; i++) {
+		Int k;
+		k.SetInt32(i + 1);
+		k.Mult(&customStep);
+		stepGn[i] = secp->ComputePublicKey(&k);
+	}
+	Point _2StepGn;
+	{
+		Int k;
+		k.SetInt32(grpSize);
+		k.Mult(&customStep);
+		_2StepGn = secp->ComputePublicKey(&k);
+	}
+	g->SetStepTable(stepGn, _2StepGn);
+	delete[] stepGn;
+
+	// Шаг за одну итерацию = customStep * grpSize
+	Int customStep_grpSize(&customStep);
+	customStep_grpSize.Mult((uint64_t)grpSize);
+	Point stepP_grpSize = secp->ComputePublicKey(&customStep_grpSize);
+
+	ok = g->SetKeys(p);  // Первый запуск ядра (только здесь!)===================
 
 	ph->hasStarted = true;
 	ph->rKeyRequest = false;
 
-    // === МОИ ПРАВКИ: Предвычисляем шаг на эллиптической кривой ===
-    // customStep * G — это на сколько сдвинуть стартовую точку p[i]
-    Point stepP = secp->ComputePublicKey(&customStep);
-    // ================================================================
+	// GPU Thread ++++
+	while (ok && !endOfSearch) {
 
-    // GPU Thread ++++
-    while (ok && !endOfSearch) {
+		if (counters[thId] >= maxIters) {
+			endOfSearch = true;
+			break;
+		}
 
-        // === МОИ ПРАВКИ: Проверка на лимит итераций ===
-        if (counters[thId] >= maxIters) {
-            endOfSearch = true;
-            break;
-        }
-        // ==================================================
+		if (ph->rKeyRequest) {
+			getGPUStartingKeys(tRangeStart, tRangeEnd, g->GetGroupSize(), nbThread, keys, p);
+			#pragma omp parallel for
+			for (int i = 0; i < nbThread; i++) {
+				Int k(keys + i);
+				Int offset(&customStep);
+				offset.Mult((uint64_t)halfGrp);
+				k.Add(&offset);
+				p[i] = secp->ComputePublicKey(&k);
+			}
+			ok = g->UpdateKeys(p);
+			ok = g->RunKernelSX();
+			ph->rKeyRequest = false;
+		}
 
-        if (ph->rKeyRequest) {
-            getGPUStartingKeys(tRangeStart, tRangeEnd, g->GetGroupSize(), nbThread, keys, p);
-            ok = g->SetKeys(p);
-            ph->rKeyRequest = false;
-        }
+		// Call kernel
+		switch (searchMode) {
+		case (int)SEARCH_MODE_SX:
+			ok = g->LaunchSEARCH_MODE_SX(found, false);
+			for (int i = 0; i < (int)found.size() && !endOfSearch; i++) {
+				ITEM it = found[i];
+				if (checkPrivKeyX(keys[it.thId], it.incr, it.mode)) {
+					nbFoundKey++;
+				}
+			}
+			break;
+		default:
+			break;
+		}
 
-        // Call kernel
-        switch (searchMode) {
-        case (int)SEARCH_MODE_MA:
-            ok = g->LaunchSEARCH_MODE_MA(found, false);
-            for (int i = 0; i < (int)found.size() && !endOfSearch; i++) {
-                ITEM it = found[i];
-                if (coinType == COIN_BTC) {
-                    std::string addr = secp->GetAddress(it.mode, it.hash);
-                    if (checkPrivKey(addr, keys[it.thId], it.incr, it.mode)) {
-                        nbFoundKey++;
-                    }
-                }
-                else {
-                    std::string addr = secp->GetAddressETH(it.hash);
-                    if (checkPrivKeyETH(addr, keys[it.thId], it.incr)) {
-                        nbFoundKey++;
-                    }
-                }
-            }
-            break;
-        case (int)SEARCH_MODE_MX:
-            ok = g->LaunchSEARCH_MODE_MX(found, false);
-            for (int i = 0; i < (int)found.size() && !endOfSearch; i++) {
-                ITEM it = found[i];
-                if (checkPrivKeyX(/*addr,*/ keys[it.thId], it.incr, it.mode)) {
-                    nbFoundKey++;
-                }
-            }
-            break;
-        case (int)SEARCH_MODE_SA:
-            ok = g->LaunchSEARCH_MODE_SA(found, false);
-            for (int i = 0; i < (int)found.size() && !endOfSearch; i++) {
-                ITEM it = found[i];
-                if (coinType == COIN_BTC) {
-                    std::string addr = secp->GetAddress(it.mode, it.hash);
-                    if (checkPrivKey(addr, keys[it.thId], it.incr, it.mode)) {
-                        nbFoundKey++;
-                    }
-                }
-                else {
-                    std::string addr = secp->GetAddressETH(it.hash);
-                    if (checkPrivKeyETH(addr, keys[it.thId], it.incr)) {
-                        nbFoundKey++;
-                    }
-                }
-            }
-            break;
-        case (int)SEARCH_MODE_SX:
-            ok = g->LaunchSEARCH_MODE_SX(found, false);
-            for (int i = 0; i < (int)found.size() && !endOfSearch; i++) {
-                ITEM it = found[i];
-                if (checkPrivKeyX(/*addr,*/ keys[it.thId], it.incr, it.mode)) {
-                    nbFoundKey++;
-                }
-            }
-            break;
-        default:
-            break;
-        }
+		if (ok) {
+			#pragma omp parallel for
+			for (int i = 0; i < nbThread; i++) {
+				keys[i].Add(&customStep_grpSize);
+				p[i] = secp->AddDirect(p[i], stepP_grpSize);
+			}
+			ok = g->UpdateKeys(p);
+			ok = g->RunKernelSX();
 
-        if (ok) {
-            for (int i = 0; i < nbThread; i++) {
-                // === МОИ ПРАВКИ: Применяем наш огромный шаг ===
-                keys[i].Add(&customStep);
-                // === ИСПРАВЛЕНИЕ: Обновляем стартовую точку p[i] ===
-                // p[i] должен соответствовать (keys[i] + groupSize/2) * G
-                // Быстрее добавить stepP к текущей p[i], чем пересчитывать с нуля
-                p[i] = secp->AddDirect(p[i], stepP);
-                // ==================================================
-            }
-            // === ИСПРАВЛЕНИЕ: Передаём обновлённые точки на GPU ===
-            ok = g->SetKeys(p);
-            // =====================================================
-            counters[thId] += (uint64_t)(STEP_SIZE)*nbThread; // Point
-        }
-
-    }
+			counters[thId] += (uint64_t)(grpSize) * (uint64_t)nbThread;
+		}
+	}
 
 	delete[] keys;
 	delete[] p;
@@ -1026,9 +1027,7 @@ void KeyHunt::FindKeyGPU(TH_PARAM * ph)
 #endif
 
 	ph->isRunning = false;
-
 }
-
 // ----------------------------------------------------------------------------
 
 bool KeyHunt::isAlive(TH_PARAM * p)
@@ -1243,12 +1242,12 @@ void KeyHunt::Search(int nbThread, std::vector<int> gpuId, std::vector<int> grid
 
 		if (isAlive(params)) {
 			memset(timeStr, '\0', 256);
-			printf("\r[%s] [CPU+GPU: %.2f Mk/s] [GPU: %.2f Mk/s] [C: %lf %%] [R: %lu] [T: %s (%d bit)] [F: %d]  ",
-				toTimeStr(t1, timeStr),
+			printf("\r[%s] [CPU+GPU: %.2f Mk/s] [GPU: %.2f Mk/s] [C: %lf %%] [R: %llu] [T: %s (%d bit)] [F: %d] ",
+				toTimeStr((int)t1, timeStr),
 				avgKeyRate / 1000000.0,
 				avgGpuKeyRate / 1000000.0,
 				completedPerc,
-				rKeyCount,
+				(unsigned long long)rKeyCount,
 				formatThousands(count).c_str(),
 				completedBits,
 				nbFoundKey);
@@ -1367,7 +1366,7 @@ std::string KeyHunt::formatThousands(uint64_t x)
 {
 	char buf[32] = "";
 
-	sprintf(buf, "%lu", x);
+	sprintf(buf, "%llu", x);
 
 	std::string s(buf);
 
