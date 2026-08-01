@@ -425,52 +425,6 @@ void GPUEngine::InitGenratorTable(Secp256K1* secp)
 }
 
 // ----------------------------------------------------------------------------
-void GPUEngine::SetStepTable(Point* stepGn, Point _2StepGn)
-{
-	uint64_t GxPinned[(GRP_SIZE / 2) * 4];
-	uint64_t GyPinned[(GRP_SIZE / 2) * 4];
-	uint64_t _2GnxPinned[4];
-	uint64_t _2GnyPinned[4];
-
-	for (int i = 0; i < GRP_SIZE / 2; i++) {
-		for (int j = 0; j < 4; j++) {
-			GxPinned[i * 4 + j] = stepGn[i].x.bits64[j];
-			GyPinned[i * 4 + j] = stepGn[i].y.bits64[j];
-		}
-	}
-	for (int j = 0; j < 4; j++) {
-		_2GnxPinned[j] = _2StepGn.x.bits64[j];
-		_2GnyPinned[j] = _2StepGn.y.bits64[j];
-	}
-
-	size_t TSIZE = (GRP_SIZE / 2) * 4 * sizeof(uint64_t);
-	CudaSafeCall(cudaMemcpy(_Gx, GxPinned, TSIZE, cudaMemcpyHostToDevice));
-	CudaSafeCall(cudaMemcpy(_Gy, GyPinned, TSIZE, cudaMemcpyHostToDevice));
-	CudaSafeCall(cudaMemcpy(__2Gnx, _2GnxPinned, 4 * sizeof(uint64_t), cudaMemcpyHostToDevice));
-	CudaSafeCall(cudaMemcpy(__2Gny, _2GnyPinned, 4 * sizeof(uint64_t), cudaMemcpyHostToDevice));
-}
-bool GPUEngine::UpdateKeys(Point* p)
-{
-	for (int i = 0; i < nbThread; i += nbThreadPerGroup) {
-		for (int j = 0; j < nbThreadPerGroup; j++) {
-			inputKeyPinned[8 * i + j + 0 * nbThreadPerGroup] = p[i + j].x.bits64[0];
-			inputKeyPinned[8 * i + j + 1 * nbThreadPerGroup] = p[i + j].x.bits64[1];
-			inputKeyPinned[8 * i + j + 2 * nbThreadPerGroup] = p[i + j].x.bits64[2];
-			inputKeyPinned[8 * i + j + 3 * nbThreadPerGroup] = p[i + j].x.bits64[3];
-			inputKeyPinned[8 * i + j + 4 * nbThreadPerGroup] = p[i + j].y.bits64[0];
-			inputKeyPinned[8 * i + j + 5 * nbThreadPerGroup] = p[i + j].y.bits64[1];
-			inputKeyPinned[8 * i + j + 6 * nbThreadPerGroup] = p[i + j].y.bits64[2];
-			inputKeyPinned[8 * i + j + 7 * nbThreadPerGroup] = p[i + j].y.bits64[3];
-		}
-	}
-	CudaSafeCall(cudaMemcpy(inputKey, inputKeyPinned, nbThread * 32 * 2, cudaMemcpyHostToDevice));
-	return true;
-}
-
-bool GPUEngine::RunKernelSX()
-{
-	return true;
-}
 
 int GPUEngine::GetGroupSize()
 {
